@@ -17,7 +17,13 @@ def stack_params
     ],
     timeout_in_minutes: 10,
     capabilities: ["CAPABILITY_IAM"],
-    on_failure: "ROLLBACK"
+    on_failure: "DO_NOTHING",
+    tags: [
+      {
+        key: "e",
+        value: "f"
+      }
+    ]
   }
 end
 
@@ -48,9 +54,13 @@ describe Vaporware do
             template_filename: "doesn'tmatter",
             timeout: 10,
             parameters: {
-              "a" => "b",
-              "c" => "d"
-            }
+              a: "b",
+              c: "d"
+            },
+            tags: {
+              e: "f"
+            },
+            on_failure: "DO_NOTHING"
           }).create_stack
         end
       end
@@ -75,7 +85,11 @@ describe Vaporware do
             parameters: {
               "a" => "b",
               "c" => "d"
-            }
+            },
+            tags: {
+              e: "f"
+            },
+            on_failure: "DO_NOTHING"
           }).update_stack
         end
       end

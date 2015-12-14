@@ -7,7 +7,9 @@ class Vaporware
     options = {
       stack_name: "change-me",
       parameters: {},
-      timeout: 40 # minutes
+      timeout: 40, # minutes
+      tags: {},
+      on_failure: "ROLLBACK"
     }.merge opts
     fail "You must specify a template filename!" unless options[:template_filename]
 
@@ -16,6 +18,8 @@ class Vaporware
     @template_body = File.read(options[:template_filename])
     @parameters = build_parameters options[:parameters]
     @timeout = options[:timeout]
+    @tags = build_tags options[:tags]
+    @on_failure = options[:on_failure]
   end
 
   def apply
@@ -54,6 +58,15 @@ class Vaporware
     end
   end
 
+  def build_tags tags
+    tags.keys.reduce([]) do |acc, key|
+      acc << {
+        key: key.to_s,
+        value: tags[key]
+      }
+    end
+  end
+
   def stack_params
     {
       stack_name: @stack_name,
@@ -61,7 +74,8 @@ class Vaporware
       parameters: @parameters,
       timeout_in_minutes: @timeout,
       capabilities: ["CAPABILITY_IAM"],
-      on_failure: "ROLLBACK"
+      on_failure: @on_failure,
+      tags: @tags
     }
   end
 
