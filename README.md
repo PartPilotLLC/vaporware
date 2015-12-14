@@ -1,5 +1,7 @@
 # Vaporware
 
+[![Build Status](https://travis-ci.org/audreyschwarz/vaporware.png)](https://travis-ci.org/audreyschwarz/vaporware)
+
 A thin Ruby wrapper around the AWS CloudFormation SDK.
 
 ## Installation
@@ -39,7 +41,9 @@ Vaporware.new({
   tags: { # optional
     tag_1: "yay",
     other_tag: "whee"
-  }
+  },
+  status_max_attempts: 5, # default: 720
+  status_delay: 5 # default: 5
 })
 ```
 
