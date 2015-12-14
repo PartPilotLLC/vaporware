@@ -28,14 +28,14 @@ class Vaporware
 
   def create_stack
     with_progress "creation" do
-      @client.create_stack(stack_params)
+      @client.create_stack(stack_create_params)
       @client.wait_until(:stack_create_complete, stack_name: @stack_name)
     end
   end
 
   def update_stack
     with_progress "update" do
-      @client.update_stack(stack_params)
+      @client.update_stack(stack_update_params)
       @client.wait_until(:stack_update_complete, stack_name: @stack_name)
     end
   end
@@ -79,7 +79,7 @@ class Vaporware
     end
   end
 
-  def stack_params
+  def stack_create_params
     {
       stack_name: @stack_name,
       template_body: @template_body,
@@ -88,6 +88,15 @@ class Vaporware
       capabilities: ["CAPABILITY_IAM"],
       on_failure: @on_failure,
       tags: @tags
+    }
+  end
+
+  def stack_update_params
+    {
+      stack_name: @stack_name,
+      template_body: @template_body,
+      parameters: @parameters,
+      capabilities: ["CAPABILITY_IAM"]
     }
   end
 

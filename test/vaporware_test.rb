@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require './lib/vaporware'
 
-def stack_params
+def stack_create_params
   {
     stack_name: "some-stack",
     template_body: "blah",
@@ -27,6 +27,24 @@ def stack_params
   }
 end
 
+def stack_update_params
+  {
+    stack_name: "some-stack",
+    template_body: "blah",
+    parameters: [
+      {
+        parameter_key: "a",
+        parameter_value: "b"
+      },
+      {
+        parameter_key: "c",
+        parameter_value: "d"
+      }
+    ],
+    capabilities: ["CAPABILITY_IAM"]
+  }
+end
+
 describe Vaporware do
   it "raises an exception when no template_filename is provided" do
     raised = false
@@ -42,7 +60,7 @@ describe Vaporware do
   describe "#create_stack" do
     it "calls the client with an acceptable set of options" do
       mock = MiniTest::Mock.new
-      mock.expect :create_stack, nil, [stack_params]
+      mock.expect :create_stack, nil, [stack_create_params]
       mock.expect :wait_until, nil, [:stack_create_complete, { stack_name: "some-stack" }]
       mock.expect :stack_events, []
       mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }]
@@ -71,7 +89,7 @@ describe Vaporware do
   describe "#update_stack" do
     it "calls the client with an acceptable set of options" do
       mock = MiniTest::Mock.new
-      mock.expect :update_stack, nil, [stack_params]
+      mock.expect :update_stack, nil, [stack_update_params]
       mock.expect :wait_until, nil, [:stack_update_complete, { stack_name: "some-stack" }]
       mock.expect :stack_events, []
       mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }]
