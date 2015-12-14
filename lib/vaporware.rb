@@ -18,6 +18,10 @@ class Vaporware
     @timeout = options[:timeout]
   end
 
+  def apply
+    stack_exists? ? update_stack : create_stack
+  end
+
   def create_stack
     @client.create_stack(stack_params)
     @client.wait_until(:stack_create_complete, stack_name: @stack_name)
@@ -53,5 +57,14 @@ class Vaporware
       capabilities: ["CAPABILITY_IAM"],
       on_failure: "ROLLBACK"
     }
+  end
+
+  def stack_exists?
+    begin
+      @client.describe_stacks(stack_name: @stack_name)
+    rescue Aws::CloudFormation::Errors::ValidationError => e
+      return false
+    end
+    true
   end
 end

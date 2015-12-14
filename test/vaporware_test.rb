@@ -96,4 +96,43 @@ describe Vaporware do
       mock.verify
     end
   end
+
+  describe "#apply" do
+    it "checks stack existence by calling client#describe_stacks" do
+      mock = MiniTest::Mock.new
+      mock.expect :describe_stacks, nil, [{ stack_name: "change-me"}]
+
+      File.stub :read, ->(f) { nil } do
+        Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
+          vaporware = Vaporware.new template_filename: "doesn'tmatter"
+          vaporware.stub(:update_stack, nil) do
+            vaporware.apply
+          end
+        end
+      end
+      mock.verify
+    end
+
+    it "updates the stack if the stack exists" do
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.stub(:stack_exists?, true) do
+          vaporware.stub(:update_stack, nil) do
+            vaporware.apply
+          end
+        end
+      end
+    end
+
+    it "creates the stack if the stack doesn't exist" do
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.stub(:stack_exists?, false) do
+          vaporware.stub(:create_stack, nil) do
+            vaporware.apply
+          end
+        end
+      end
+    end
+  end
 end
