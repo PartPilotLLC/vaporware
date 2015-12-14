@@ -1,6 +1,8 @@
 require 'aws-sdk'
 
 class Vaporware
+  attr_reader :client
+  
   def initialize opts = {}
     options = {
       stack_name: "change-me",

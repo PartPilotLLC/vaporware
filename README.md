@@ -1,3 +1,3 @@
-# Vapor
+# Vaporware
 
 A thin wrapper around the AWS CloudFormation SDK.
