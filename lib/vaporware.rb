@@ -9,7 +9,9 @@ class Vaporware
       parameters: {},
       timeout: 40, # minutes
       tags: {},
-      on_failure: "ROLLBACK" # or: DO_NOTHING, DELETE
+      on_failure: "ROLLBACK", # or: DO_NOTHING, DELETE
+      status_max_attempts: 360,
+      status_delay: 10
     }.merge opts
     fail "You must specify a template filename!" unless options[:template_filename]
 
@@ -20,6 +22,8 @@ class Vaporware
     @timeout = options[:timeout]
     @tags = build_tags options[:tags]
     @on_failure = options[:on_failure]
+    @status_max_attempts = options[:status_max_attempts]
+    @status_delay = options[:status_delay]
   end
 
   def apply
@@ -29,21 +33,30 @@ class Vaporware
   def create_stack
     with_progress "creation" do
       @client.create_stack(stack_create_params)
-      @client.wait_until(:stack_create_complete, stack_name: @stack_name)
+      @client.wait_until(:stack_create_complete, stack_name: @stack_name) do |w|
+        w.max_attempts = @status_max_attempts
+        w.delay = @status_delay
+      end
     end
   end
 
   def update_stack
     with_progress "update" do
       @client.update_stack(stack_update_params)
-      @client.wait_until(:stack_update_complete, stack_name: @stack_name)
+      @client.wait_until(:stack_update_complete, stack_name: @stack_name) do |w|
+        w.max_attempts = @status_max_attempts
+        w.delay = @status_delay
+      end
     end
   end
 
   def delete_stack
     with_progress "deletion" do
       @client.delete_stack(stack_name: @stack_name)
-      @client.wait_until(:stack_delete_complete, stack_name: @stack_name)
+      @client.wait_until(:stack_delete_complete, stack_name: @stack_name) do |w|
+        w.max_attempts = @status_max_attempts
+        w.delay = @status_delay
+      end
     end
   end
 
