@@ -38,6 +38,8 @@ describe Vaporware do
       mock = MiniTest::Mock.new
       mock.expect :create_stack, nil, [stack_params]
       mock.expect :wait_until, nil, [:stack_create_complete, { stack_name: "some-stack" }]
+      mock.expect :stack_events, []
+      mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }]
 
       File.stub :read, ->(f) { 'blah' } do
         Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
@@ -61,6 +63,8 @@ describe Vaporware do
       mock = MiniTest::Mock.new
       mock.expect :update_stack, nil, [stack_params]
       mock.expect :wait_until, nil, [:stack_update_complete, { stack_name: "some-stack" }]
+      mock.expect :stack_events, []
+      mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }]
 
       File.stub :read, ->(f) { 'blah' } do
         Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
@@ -84,6 +88,8 @@ describe Vaporware do
       mock = MiniTest::Mock.new
       mock.expect :delete_stack, nil, [{ stack_name: "some-stack" }]
       mock.expect :wait_until, nil, [:stack_delete_complete, { stack_name: "some-stack" }]
+      mock.expect :stack_events, []
+      mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }]
 
       File.stub :read, ->(f) { nil } do
         Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
