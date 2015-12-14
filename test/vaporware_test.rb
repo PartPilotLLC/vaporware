@@ -155,4 +155,28 @@ describe Vaporware do
       end
     end
   end
+
+  describe "#outputs" do
+    it "returns a message if stack has no outputs" do
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.stub :get_outputs, [] do
+          vaporware.outputs.must_equal "Stack 'change-me' has no outputs."
+        end
+      end
+    end
+
+    it "returns formatted outputs if stack has outputs" do
+      mock = MiniTest::Mock.new
+      mock.expect :description, "blah"
+      mock.expect :output_key, "key"
+      mock.expect :output_value, "value"
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.stub :get_outputs, [mock] do
+          vaporware.outputs.must_equal "blah (key): value\n"
+        end
+      end
+    end
+  end
 end

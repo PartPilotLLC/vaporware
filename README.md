@@ -16,13 +16,40 @@ gem "vaporware", "~> 0.0"
 
 ## Usage
 
-#### In a Rake task
+### Methods
+
+- `#create_stack` - Creates the stack
+- `#delete_stack` - Deletes the stack
+- `#update_stack` - Updates the stack
+- `#apply` -  Updates or creates the stack, depending on status
+- `#outputs` - Gets the stack outputs
+
+### Parameters
+
+```ruby
+Vaporware.new({
+  stack_name: "the-stack-name", # default: change-me
+  template_filename: "cf.template", # required
+  timeout: 10, # minutes, default: 40
+  on_failure: "DO_NOTHING", # default: ROLLBACK
+  parameters: { # optional
+    SomeKey: "some_value",
+    AnotherKey: "another_value"
+  },
+  tags: { # optional
+    tag_1: "yay",
+    other_tag: "whee"
+  }
+})
+```
+
+#### Using in a Rake task
 
 ```ruby
 require 'vaporware'
 
 task :make_stack do
-  Vaporware.new({
+  v = Vaporware.new({
     stack_name: "some-stack",
     template_filename: "cf.template",
     timeout: 40, # minutes
@@ -31,5 +58,6 @@ task :make_stack do
       Blah: "yes"
     }
   }).apply
+  puts v.outputs
 end
 ```

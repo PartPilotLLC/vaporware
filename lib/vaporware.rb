@@ -42,12 +42,24 @@ class Vaporware
 
   def delete_stack
     with_progress "deletion" do
-      @client.delete_stack({ stack_name: @stack_name })
+      @client.delete_stack(stack_name: @stack_name)
       @client.wait_until(:stack_delete_complete, stack_name: @stack_name)
     end
   end
 
+  def outputs
+    output = get_outputs.reduce("") do |acc, output|
+      acc << "#{output.description} (#{output.output_key}): #{output.output_value}\n"
+    end
+    return "Stack '#{@stack_name}' has no outputs." if output == ""
+    output
+  end
+
   private
+
+  def get_outputs
+    @client.describe_stacks(stack_name: @stack_name).stacks.first.outputs
+  end
 
   def build_parameters parameters
     parameters.keys.reduce([]) do |acc, key|

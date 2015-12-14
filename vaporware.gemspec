@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'vaporware'
-  s.version     = '0.0.4'
+  s.version     = '0.0.5'
   s.date        = '2015-12-13'
   s.summary     = "Vaporware"
   s.description = "A thin wrapper for running CloudFormation templates"
