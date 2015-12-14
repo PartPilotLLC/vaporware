@@ -9,7 +9,7 @@ class Vaporware
       parameters: {},
       timeout: 40 # minutes
     }.merge opts
-    fail "You must specify the template filename!" unless options[:template_filename]
+    fail "You must specify a template filename!" unless options[:template_filename]
 
     @client = Aws::CloudFormation::Client.new
     @stack_name = options[:stack_name]
