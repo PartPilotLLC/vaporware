@@ -9,7 +9,7 @@ class Vaporware
       parameters: {},
       timeout: 40, # minutes
       tags: {},
-      on_failure: "ROLLBACK"
+      on_failure: "ROLLBACK" # or: DO_NOTHING, DELETE
     }.merge opts
     fail "You must specify a template filename!" unless options[:template_filename]
 
