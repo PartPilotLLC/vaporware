@@ -42,7 +42,7 @@ class Vaporware
   def build_parameters parameters
     parameters.keys.reduce([]) do |acc, key|
       acc << {
-        parameter_key: key,
+        parameter_key: key.to_s,
         parameter_value: parameters[key]
       }
     end

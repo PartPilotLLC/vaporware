@@ -27,8 +27,8 @@ task :make_stack do
     template_filename: "cf.template",
     timeout: 40, # minutes
     parameters: {
-      "S3Bucket" => "somebucket",
-      "Blah" => "yes"
+      S3Bucket: "somebucket",
+      Blah: "yes"
     }
   }).apply
 end
