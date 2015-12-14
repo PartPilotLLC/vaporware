@@ -50,14 +50,9 @@ require 'vaporware'
 
 task :make_stack do
   v = Vaporware.new({
-    stack_name: "some-stack",
-    template_filename: "cf.template",
-    timeout: 40, # minutes
-    parameters: {
-      S3Bucket: "somebucket",
-      Blah: "yes"
-    }
-  }).apply
+    ...params
+  })
+  v.apply
   puts v.outputs
 end
 ```
