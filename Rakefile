@@ -10,3 +10,5 @@ task :test do
   Dir["./test/*.rb"].each { |f| require f }
 end
 task t: :test
+
+task default: :test
