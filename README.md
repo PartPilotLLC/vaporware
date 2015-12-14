@@ -11,7 +11,7 @@ gem install vaporware
 Or with Bundler:
 ```ruby
 # Gemfile
-gem "vaporware", "~> 0.0"
+gem "vaporware", "~> 0.0.8"
 ```
 
 ## Usage

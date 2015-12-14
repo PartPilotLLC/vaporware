@@ -10,8 +10,8 @@ class Vaporware
       timeout: 40, # minutes
       tags: {},
       on_failure: "ROLLBACK", # or: DO_NOTHING, DELETE
-      status_max_attempts: 360,
-      status_delay: 10
+      status_max_attempts: 720,
+      status_delay: 5
     }.merge opts
     fail "You must specify a template filename!" unless options[:template_filename]
 
@@ -31,32 +31,20 @@ class Vaporware
   end
 
   def create_stack
-    with_progress "creation" do
+    wait_for "creation", :stack_create_complete do
       @client.create_stack(stack_create_params)
-      @client.wait_until(:stack_create_complete, stack_name: @stack_name) do |w|
-        w.max_attempts = @status_max_attempts
-        w.delay = @status_delay
-      end
     end
   end
 
   def update_stack
-    with_progress "update" do
+    wait_for "update", :stack_update_complete do
       @client.update_stack(stack_update_params)
-      @client.wait_until(:stack_update_complete, stack_name: @stack_name) do |w|
-        w.max_attempts = @status_max_attempts
-        w.delay = @status_delay
-      end
     end
   end
 
   def delete_stack
-    with_progress "deletion" do
+    wait_for "deletion", :stack_delete_complete do
       @client.delete_stack(stack_name: @stack_name)
-      @client.wait_until(:stack_delete_complete, stack_name: @stack_name) do |w|
-        w.max_attempts = @status_max_attempts
-        w.delay = @status_delay
-      end
     end
   end
 
@@ -138,21 +126,27 @@ class Vaporware
     new_events.reverse
   end
 
-  def with_progress goal
+  def format_events events
+    return "." if events.size == 0
+    events.reduce("") do |acc, event|
+      acc << "[#{event.timestamp}] #{event.logical_resource_id} (#{event.resource_type}): #{event.resource_status}\n"
+    end
+  end
+
+  def wait_for goal, event_type
     @old_events = -1
     new_stack_events
-    progress_thread = Thread.new do
-      loop do
-        puts "Waiting for stack #{goal}..."
-        sleep 5
+    puts "Waiting for stack #{goal}..."
+    yield
+    @client.wait_until(event_type, stack_name: @stack_name) do |w|
+      w.max_attempts = @status_max_attempts
+      w.delay = @status_delay
+      w.before_wait do
         new_events = new_stack_events
-        new_events.each do |event|
-          puts "[#{event.timestamp}] #{event.logical_resource_id} (#{event.resource_type}): #{event.resource_status}"
-        end
+        puts format_events new_events
       end
     end
-    yield
-    progress_thread.exit
+    puts format_events new_stack_events
     puts "Stack #{goal} complete!"
   end
 end
