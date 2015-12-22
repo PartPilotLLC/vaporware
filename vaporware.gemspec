@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.description = "A thin wrapper for running CloudFormation templates"
   s.authors     = ["Audrey Schwarz"]
   s.email       = 'acbschwarz@gmail.com'
-  s.files       = ["lib/vaporware.rb"]
+  s.files       = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   s.homepage    = 'https://github.com/audreyschwarz/vaporware'
   s.license     = 'MIT'
   s.required_ruby_version = '~> 2'
-  s.add_runtime_dependency 'aws-sdk', '~> 2'
+  s.add_dependency 'aws-sdk', '~> 2'
   s.add_development_dependency 'pry', '~> 0.10'
   s.add_development_dependency 'minitest', '~> 5.8'
 end

@@ -174,12 +174,12 @@ describe Vaporware do
     end
   end
 
-  describe "#outputs" do
+  describe "#print_outputs" do
     it "returns a message if stack has no outputs" do
       File.stub :read, ->(f) { nil } do
         vaporware = Vaporware.new template_filename: "doesn'tmatter"
         vaporware.stub :get_outputs, [] do
-          vaporware.outputs.must_equal "Stack 'change-me' has no outputs."
+          vaporware.print_outputs.must_equal "Stack 'change-me' has no outputs."
         end
       end
     end
@@ -192,7 +192,18 @@ describe Vaporware do
       File.stub :read, ->(f) { nil } do
         vaporware = Vaporware.new template_filename: "doesn'tmatter"
         vaporware.stub :get_outputs, [mock] do
-          vaporware.outputs.must_equal "blah (key): value\n"
+          vaporware.print_outputs.must_equal "blah (key): value\n"
+        end
+      end
+    end
+  end
+
+  describe "#outputs" do
+    it "returns the raw outputs" do
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.stub :get_outputs, { something: "outputs here" } do
+          vaporware.outputs.must_equal something: "outputs here"
         end
       end
     end

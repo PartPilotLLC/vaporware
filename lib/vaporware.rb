@@ -9,6 +9,7 @@ class Vaporware
       parameters: {},
       timeout: 40, # minutes
       tags: {},
+      capabilities: ["CAPABILITY_IAM"],
       on_failure: "ROLLBACK", # or: DO_NOTHING, DELETE
       status_max_attempts: 720,
       status_delay: 5
@@ -21,6 +22,7 @@ class Vaporware
     @parameters = build_parameters options[:parameters]
     @timeout = options[:timeout]
     @tags = build_tags options[:tags]
+    @capabilities = options[:capabilities]
     @on_failure = options[:on_failure]
     @status_max_attempts = options[:status_max_attempts]
     @status_delay = options[:status_delay]
@@ -49,6 +51,10 @@ class Vaporware
   end
 
   def outputs
+    get_outputs
+  end
+
+  def print_outputs
     output = get_outputs.reduce("") do |acc, output|
       acc << "#{output.description} (#{output.output_key}): #{output.output_value}\n"
     end
@@ -58,10 +64,12 @@ class Vaporware
 
   private
 
+  # private
   def get_outputs
     @client.describe_stacks(stack_name: @stack_name).stacks.first.outputs
   end
 
+  # private
   def build_parameters parameters
     parameters.keys.reduce([]) do |acc, key|
       acc << {
@@ -71,6 +79,7 @@ class Vaporware
     end
   end
 
+  # private
   def build_tags tags
     tags.keys.reduce([]) do |acc, key|
       acc << {
@@ -80,27 +89,30 @@ class Vaporware
     end
   end
 
+  # private
   def stack_create_params
     {
       stack_name: @stack_name,
       template_body: @template_body,
       parameters: @parameters,
       timeout_in_minutes: @timeout,
-      capabilities: ["CAPABILITY_IAM"],
+      capabilities: @capabilities,
       on_failure: @on_failure,
       tags: @tags
     }
   end
 
+  # private
   def stack_update_params
     {
       stack_name: @stack_name,
       template_body: @template_body,
       parameters: @parameters,
-      capabilities: ["CAPABILITY_IAM"]
+      capabilities: @capabilities
     }
   end
 
+  # private
   def stack_exists?
     begin
       @client.describe_stacks(stack_name: @stack_name)
@@ -110,6 +122,7 @@ class Vaporware
     true
   end
 
+  # private
   def stack_events
     events = []
     begin
@@ -119,6 +132,7 @@ class Vaporware
     events
   end
 
+  # private
   def new_stack_events
     new_events = stack_events[0..@old_events]
     return [] if new_events.size == 0
@@ -126,6 +140,7 @@ class Vaporware
     new_events.reverse
   end
 
+  # private
   def format_events events
     return "." if events.size == 0
     events.reduce("") do |acc, event|
@@ -133,6 +148,7 @@ class Vaporware
     end
   end
 
+  # private
   def wait_for goal, event_type
     @old_events = -1
     new_stack_events

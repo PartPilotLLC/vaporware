@@ -42,6 +42,7 @@ Vaporware.new({
     tag_1: "yay",
     other_tag: "whee"
   },
+  capabilities: ["SOME_CAPABILITY"], # default: CAPABILITY_IAM
   status_max_attempts: 5, # default: 720
   status_delay: 5 # default: 5
 })
