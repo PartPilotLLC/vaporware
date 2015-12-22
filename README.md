@@ -1,6 +1,6 @@
 # Vaporware
 
-[![Build Status](https://travis-ci.org/audreyschwarz/vaporware.png)](https://travis-ci.org/audreyschwarz/vaporware)
+[![Build Status](https://travis-ci.org/audreyschwarz/vaporware.svg?branch=master)](https://travis-ci.org/audreyschwarz/vaporware)
 
 A thin Ruby wrapper around the AWS CloudFormation SDK.
 
