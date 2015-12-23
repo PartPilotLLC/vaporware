@@ -174,12 +174,12 @@ describe Vaporware do
     end
   end
 
-  describe "#print_outputs" do
+  describe "#printable_outputs" do
     it "returns a message if stack has no outputs" do
       File.stub :read, ->(f) { nil } do
         vaporware = Vaporware.new template_filename: "doesn'tmatter"
         vaporware.stub :get_outputs, [] do
-          vaporware.print_outputs.must_equal "Stack 'change-me' has no outputs."
+          vaporware.printable_outputs.must_equal "Stack 'change-me' has no outputs."
         end
       end
     end
@@ -192,18 +192,32 @@ describe Vaporware do
       File.stub :read, ->(f) { nil } do
         vaporware = Vaporware.new template_filename: "doesn'tmatter"
         vaporware.stub :get_outputs, [mock] do
-          vaporware.print_outputs.must_equal "blah (key): value\n"
+          vaporware.printable_outputs.must_equal "blah (key): value\n"
         end
       end
     end
   end
 
   describe "#outputs" do
-    it "returns the raw outputs" do
+    it "returns the raw outputs, with keys symbolized" do
+      fake_output = Struct.new("FakeOutput", :output_key, :output_value).new
+      fake_output.output_key = "something"
+      fake_output.output_value = "outputs here"
       File.stub :read, ->(f) { nil } do
         vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub :get_outputs, { something: "outputs here" } do
+        vaporware.stub :get_outputs, [fake_output] do
           vaporware.outputs.must_equal something: "outputs here"
+        end
+      end
+    end
+  end
+
+  describe "#validate!" do
+    it "validates the template" do
+      File.stub :read, ->(f) { nil } do
+        vaporware = Vaporware.new template_filename: "doesn'tmatter"
+        vaporware.client.stub :validate_template, ->(_) { true } do
+          vaporware.validate!.must_equal true
         end
       end
     end

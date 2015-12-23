@@ -24,7 +24,9 @@ gem "vaporware", "~> 0.0.8"
 - `#delete_stack` - Deletes the stack
 - `#update_stack` - Updates the stack
 - `#apply` -  Updates or creates the stack, depending on status
-- `#outputs` - Gets the stack outputs
+- `#outputs` - Gets the stack outputs as a hash with symbolized keys
+- `#printable_outputs` - Returns a formatted string of the outputs
+- `#validate!` - Validates the template. Throws `Aws::CloudFormation::Errors::ValidationError` when invalid.
 
 ### Parameters
 

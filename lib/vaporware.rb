@@ -51,15 +51,22 @@ class Vaporware
   end
 
   def outputs
-    get_outputs
+    get_outputs.inject({}) do |acc, output|
+      acc[output.output_key.to_sym] = output.output_value
+      acc
+    end
   end
 
-  def print_outputs
+  def printable_outputs
     output = get_outputs.reduce("") do |acc, output|
       acc << "#{output.description} (#{output.output_key}): #{output.output_value}\n"
     end
     return "Stack '#{@stack_name}' has no outputs." if output == ""
     output
+  end
+
+  def validate!
+    @client.validate_template template_body: @template_body
   end
 
   private
