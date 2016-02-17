@@ -1,4 +1,5 @@
 require 'minitest/autorun'
+require 'minitest/around/spec'
 require './lib/vaporware'
 
 def stack_create_params
@@ -46,6 +47,12 @@ def stack_update_params
 end
 
 describe Vaporware do
+  around do |test|
+    File.stub :read, ->(f) { 'blah' } do
+      test.call
+    end
+  end
+
   it "raises an exception when no template_filename is provided" do
     raised = false
     begin
@@ -65,22 +72,20 @@ describe Vaporware do
       2.times { mock.expect :stack_events, [] }
       2.times { mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }] }
 
-      File.stub :read, ->(f) { 'blah' } do
-        Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
-          Vaporware.new({
-            stack_name: "some-stack",
-            template_filename: "doesn'tmatter",
-            timeout: 10,
-            parameters: {
-              a: "b",
-              c: "d"
-            },
-            tags: {
-              e: "f"
-            },
-            on_failure: "DO_NOTHING"
-          }).create_stack
-        end
+      Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
+        Vaporware.new({
+          stack_name: "some-stack",
+          template_filename: "doesn'tmatter",
+          timeout: 10,
+          parameters: {
+            a: "b",
+            c: "d"
+          },
+          tags: {
+            e: "f"
+          },
+          on_failure: "DO_NOTHING"
+        }).create_stack
       end
       mock.verify
     end
@@ -94,22 +99,20 @@ describe Vaporware do
       2.times { mock.expect :stack_events, [] }
       2.times { mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }] }
 
-      File.stub :read, ->(f) { 'blah' } do
-        Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
-          Vaporware.new({
-            stack_name: "some-stack",
-            template_filename: "doesn'tmatter",
-            timeout: 10,
-            parameters: {
-              "a" => "b",
-              "c" => "d"
-            },
-            tags: {
-              e: "f"
-            },
-            on_failure: "DO_NOTHING"
-          }).update_stack
-        end
+      Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
+        Vaporware.new({
+          stack_name: "some-stack",
+          template_filename: "doesn'tmatter",
+          timeout: 10,
+          parameters: {
+            "a" => "b",
+            "c" => "d"
+          },
+          tags: {
+            e: "f"
+          },
+          on_failure: "DO_NOTHING"
+        }).update_stack
       end
       mock.verify
     end
@@ -123,13 +126,11 @@ describe Vaporware do
       2.times { mock.expect :stack_events, [] }
       2.times { mock.expect :describe_stack_events, mock, [{ stack_name: "some-stack" }] }
 
-      File.stub :read, ->(f) { nil } do
-        Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
-          Vaporware.new({
-            stack_name: "some-stack",
-            template_filename: "doesn'tmatter"
-          }).delete_stack
-        end
+      Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
+        Vaporware.new({
+          stack_name: "some-stack",
+          template_filename: "doesn'tmatter"
+        }).delete_stack
       end
       mock.verify
     end
@@ -138,37 +139,31 @@ describe Vaporware do
   describe "#apply" do
     it "checks stack existence by calling client#describe_stacks" do
       mock = MiniTest::Mock.new
-      mock.expect :describe_stacks, nil, [{ stack_name: "change-me"}]
+      mock.expect :describe_stacks, nil, [{ stack_name: "my-wonderful-stack"}]
 
-      File.stub :read, ->(f) { nil } do
-        Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
-          vaporware = Vaporware.new template_filename: "doesn'tmatter"
-          vaporware.stub(:update_stack, nil) do
-            vaporware.apply
-          end
+      Aws::CloudFormation::Client.stub(:new, ->() { mock }) do
+        v = Vaporware.new template_filename: "doesn'tmatter"
+        v.stub(:update_stack, nil) do
+          v.apply
         end
       end
       mock.verify
     end
 
     it "updates the stack if the stack exists" do
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub(:stack_exists?, true) do
-          vaporware.stub(:update_stack, nil) do
-            vaporware.apply
-          end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.stub(:stack_exists?, true) do
+        v.stub(:update_stack, nil) do
+          v.apply
         end
       end
     end
 
     it "creates the stack if the stack doesn't exist" do
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub(:stack_exists?, false) do
-          vaporware.stub(:create_stack, nil) do
-            vaporware.apply
-          end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.stub(:stack_exists?, false) do
+        v.stub(:create_stack, nil) do
+          v.apply
         end
       end
     end
@@ -176,11 +171,9 @@ describe Vaporware do
 
   describe "#printable_outputs" do
     it "returns a message if stack has no outputs" do
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub :get_outputs, [] do
-          vaporware.printable_outputs.must_equal "Stack 'change-me' has no outputs."
-        end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.stub :get_outputs, [] do
+        v.printable_outputs.must_equal "Stack 'my-wonderful-stack' has no outputs."
       end
     end
 
@@ -189,11 +182,9 @@ describe Vaporware do
       mock.expect :description, "blah"
       mock.expect :output_key, "key"
       mock.expect :output_value, "value"
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub :get_outputs, [mock] do
-          vaporware.printable_outputs.must_equal "blah (key): value\n"
-        end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.stub :get_outputs, [mock] do
+        v.printable_outputs.must_equal "blah (key): value\n"
       end
     end
   end
@@ -203,22 +194,18 @@ describe Vaporware do
       fake_output = Struct.new("FakeOutput", :output_key, :output_value).new
       fake_output.output_key = "something"
       fake_output.output_value = "outputs here"
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.stub :get_outputs, [fake_output] do
-          vaporware.outputs.must_equal something: "outputs here"
-        end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.stub :get_outputs, [fake_output] do
+        v.outputs.must_equal something: "outputs here"
       end
     end
   end
 
   describe "#validate!" do
     it "validates the template" do
-      File.stub :read, ->(f) { nil } do
-        vaporware = Vaporware.new template_filename: "doesn'tmatter"
-        vaporware.client.stub :validate_template, ->(_) { true } do
-          vaporware.validate!.must_equal true
-        end
+      v= Vaporware.new template_filename: "doesn'tmatter"
+      v.client.stub :validate_template, ->(_) { true } do
+        v.validate!.must_equal true
       end
     end
   end

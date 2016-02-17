@@ -7,6 +7,7 @@ end
 task c: :console
 
 task :test do
+  ENV["AWS_REGION"] = "us-west-2"
   Dir["./test/*.rb"].each { |f| require f }
 end
 task t: :test
