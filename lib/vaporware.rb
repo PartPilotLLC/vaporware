@@ -5,7 +5,7 @@ class Vaporware
 
   def initialize opts = {}
     options = {
-      stack_name: "change-me",
+      stack_name: "my-wonderful-stack",
       parameters: {},
       timeout: 40, # minutes
       tags: {},
@@ -149,7 +149,7 @@ class Vaporware
 
   # private
   def format_events events
-    return "." if events.size == 0
+    return nil if events.size == 0
     events.reduce("") do |acc, event|
       acc << "[#{event.timestamp}] #{event.logical_resource_id} (#{event.resource_type}): #{event.resource_status}\n"
     end
@@ -165,8 +165,8 @@ class Vaporware
       w.max_attempts = @status_max_attempts
       w.delay = @status_delay
       w.before_wait do
-        new_events = new_stack_events
-        puts format_events new_events
+        events = format_events new_stack_events
+        puts events if events
       end
     end
     puts format_events new_stack_events
