@@ -18,6 +18,15 @@ gem "vaporware", "~> 0.0.8"
 
 ## Usage
 
+You'll need to set some environment variables:
+
+```bash
+AWS_REGION=your-preferred-region
+AWS_ACCESS_KEY_ID=your-access-key-id
+AWS_SECRET_ACCESS_KEY=your-secret-access-key
+AWS_ACCOUNT_NUMBER=your-account-number
+```
+
 ### Methods
 
 - `#create_stack` - Creates the stack
@@ -32,7 +41,7 @@ gem "vaporware", "~> 0.0.8"
 
 ```ruby
 Vaporware.new({
-  stack_name: "the-stack-name", # default: change-me
+  stack_name: "the-stack-name", # default: my-wonderful-stack
   template_filename: "cf.template", # required
   timeout: 10, # minutes, default: 40
   on_failure: "DO_NOTHING", # default: ROLLBACK
@@ -60,6 +69,6 @@ task :make_stack do
     ...params
   })
   v.apply
-  puts v.outputs
+  puts v.printable_outputs
 end
 ```
